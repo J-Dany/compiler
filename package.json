@@ -1,0 +1,19 @@
+{
+  "name": "js-compiler",
+  "version": "0.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "build:lib": "pnpm run -r --filter=@dc-lib/* build",
+    "build:js": "pnpm run -r --filter=@dc-js/* build"
+  },
+  "keywords": [],
+  "author": "Daniele Castiglia",
+  "type": "module",
+  "license": "MIT",
+  "devDependencies": {
+    "chalk": "^5.3.0",
+    "esbuild": "^0.20.1",
+    "typescript": "^5.3.3"
+  }
+}
