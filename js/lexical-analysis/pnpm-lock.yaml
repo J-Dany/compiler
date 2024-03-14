@@ -1,0 +1,10 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  '@lib/logger':
+    specifier: workspace:../../lib/logger
+    version: link:../../lib/logger

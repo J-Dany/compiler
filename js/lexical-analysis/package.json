@@ -1,0 +1,26 @@
+{
+  "name": "@dc-js/lexical-analysis",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/*.d.ts",
+  "typings": "dist/*.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/*.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.js && tsc",
+    "test": "jest --no-cache"
+  },
+  "keywords": [],
+  "author": "Daniele Castiglia",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@dc-lib/logger": "workspace:../../lib/logger"
+  }
+}

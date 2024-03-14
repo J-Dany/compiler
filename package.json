@@ -5,15 +5,25 @@
   "private": true,
   "scripts": {
     "build:lib": "pnpm run -r --filter=@dc-lib/* build",
-    "build:js": "pnpm run -r --filter=@dc-js/* build"
+    "build:js": "pnpm run -r --filter=@dc-js/* build",
+    "test:js": "pnpm run -r --filter=@dc-js/* test"
   },
   "keywords": [],
   "author": "Daniele Castiglia",
   "type": "module",
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-typescript": "^7.23.3",
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "babel-jest": "^29.7.0",
     "chalk": "^5.3.0",
     "esbuild": "^0.20.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
 }
