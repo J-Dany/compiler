@@ -10,8 +10,6 @@ interface BasicToken {
   columnEnd: number;
 }
 
-interface ReadTemplate extends BasicToken {}
-
 interface ReadIdentifier extends BasicToken {}
 
 interface ReadString extends BasicToken {}
@@ -104,18 +102,20 @@ export default class Tokenizer {
     this.updatePosition();
     yield this.currentToken;
 
-    let content = '';
-    let currentChar = this.currentCharCode!;
-    let nextChar = this.nextCharCode!;
-    let count = this.currentPosition;
-    while (currentChar !== 96) {
+    let currentCharCode = this.currentCharCode!;
+    let nextCharCode = this.nextCharCode!;
+    let position = this.currentPosition;
+    let content = "";
+
+    while (currentCharCode !== 96) {
       // ${
-      if (currentChar === 36 && nextChar === 123) {
+      if (currentCharCode === 36 && nextCharCode === 123) {
+        this.updatePosition(position - this.currentPosition);
         yield new Token(
           TokenType.TemplateContent,
           content,
-          count - content.length,
-          count,
+          position - content.length,
+          position,
           this.currentLine,
           this.currentLineColumnCount - content.length,
           this.currentLineColumnCount
@@ -124,78 +124,123 @@ export default class Tokenizer {
         yield new Token(
           TokenType.TemplateExpressionStart,
           "${",
-          count,
-          count + 1,
+          position,
+          position + 2,
           this.currentLine,
           this.currentLineColumnCount,
           this.currentLineColumnCount + 2
         );
-        ++count;
 
+        position += 2;
         this.updatePosition(2);
 
         while (this.currentCharCode !== 125) {
-          yield this.readToken();
+          const token = this.readToken();
+          position += token.end! - token.start!;
+          yield token;
+          this.goToNextToken();
+          position += this.currentPosition - position;
         }
 
-        this.updatePosition();
         yield new Token(
           TokenType.TemplateExpressionEnd,
           "}",
-          count,
-          count + 1,
+          position,
+          position + 1,
           this.currentLine,
           this.currentLineColumnCount,
           this.currentLineColumnCount + 1
         );
-        ++count;
+
+        this.updatePosition();
+
+        content = "";
+        currentCharCode = this._charCodeAtPosition(
+          this.source[++position],
+          this.source[position + 1]
+        );
+        nextCharCode = this._charCodeAtPosition(
+          this.source[position + 1],
+          this.source[position + 2]
+        );
+        continue;
       }
 
-      content += this.source[count];
-      currentChar = this._charCodeAtPosition(
-        this.source[++count],
-        this.source[count + 1]
+      content += this.source[position];
+      currentCharCode = this._charCodeAtPosition(
+        this.source[++position],
+        this.source[position + 1]
+      );
+      nextCharCode = this._charCodeAtPosition(
+        this.source[position + 1],
+        this.source[position + 2]
       );
     }
 
-    yield new Token(
-      TokenType.TemplateContent,
-      content,
-      count - content.length,
-      count,
-      this.currentLine,
-      this.currentLineColumnCount - content.length,
-      this.currentLineColumnCount
-    );
+    if (content.length > 0) {
+      yield new Token(
+        TokenType.TemplateContent,
+        content,
+        position - content.length,
+        position,
+        this.currentLine,
+        this.currentLineColumnCount,
+        this.currentLineColumnCount + content.length
+      );
+    }
+
+    this.updatePosition(position - this.currentPosition);
 
     this.currentToken = new Token(
       TokenType.TemplateEnd,
       "`",
-      count,
-      count + 1,
+      position,
+      position + 1,
       this.currentLine,
       this.currentLineColumnCount,
       this.currentLineColumnCount + 1
     );
 
     yield this.currentToken;
-    this.updatePosition(count);
+    this.updatePosition();
   }
 
   private readToken(): Token {
     if (this.isReadingIdentifier()) {
       const identifier = this.readIdentifier();
 
-      if (identifier.value === "true" || identifier.value === "false") {
-        return new Token(
-          identifier.value === "true" ? TokenType.True : TokenType.False,
-          identifier.value === "true",
-          identifier.start,
-          identifier.end,
-          this.currentLine,
-          identifier.columnStart,
-          identifier.columnEnd
-        );
+      switch (identifier.value) {
+        case "true":
+        case "false":
+          return new Token(
+            identifier.value === "true" ? TokenType.True : TokenType.False,
+            identifier.value === "true",
+            identifier.start,
+            identifier.end,
+            this.currentLine,
+            identifier.columnStart,
+            identifier.columnEnd
+          );
+        case "null":
+          return new Token(
+            TokenType.Null,
+            null,
+            identifier.start,
+            identifier.end,
+            this.currentLine,
+            identifier.columnStart,
+            identifier.columnEnd
+          );
+        case "undefined":
+          return new Token(
+            TokenType.Undefined,
+            undefined,
+            identifier.start,
+            identifier.end,
+            this.currentLine,
+            identifier.columnStart,
+            identifier.columnEnd
+          );
       }
 
       return new Token(
@@ -218,7 +263,6 @@ export default class Tokenizer {
       case 91: // [
       case 93: // ]
       case 123: // {
-      case 125: // }
       case 63: // ?
       case 125: {
         const punctuation = new Token(
@@ -322,70 +366,13 @@ export default class Tokenizer {
     }
   }
 
-  private readTemplatePart(): ReadTemplate {
-    const initialColumn = this.currentLineColumnCount;
-
-    let template = "";
-    const res = {
-      value: "",
-      start: this.currentPosition,
-      end: this.currentPosition,
-      columnStart: initialColumn,
-      columnEnd: initialColumn,
-    } satisfies ReadTemplate;
-
-    this.updatePosition();
-    res.columnEnd += 1;
-    while (this.currentCharCode !== 96) {
-      if (this.currentCharCode === 92) {
-        this.updatePosition();
-        res.columnEnd += 1;
-        switch (this.currentChar) {
-          case "n" as string:
-            template += "\n";
-            break;
-          case "t" as string:
-            template += "\t";
-            break;
-          case "r" as string:
-            template += "\r";
-            break;
-          case "0" as string:
-            template += "\0";
-            break;
-          case "\\":
-            template += "\\";
-            break;
-          case '"' as string:
-            template += '"';
-            break;
-          case "'" as string:
-            template += "'";
-            break;
-          default:
-            template += this.currentChar;
-        }
-        this.updatePosition();
-        res.columnEnd += 1;
-      } else {
-        template += this.currentChar;
-      }
-      this.updatePosition();
-      res.end += 1;
-      res.columnEnd += 1;
-    }
-
-    res.value = template;
-    return res;
-  }
-
   private readDots(): ReadPunctuation {
     const res = {
       value: ".",
       start: this.currentPosition,
       end: this.currentPosition + 1,
       columnStart: this.currentLineColumnCount,
-      columnEnd: this.currentLineColumnCount,
+      columnEnd: this.currentLineColumnCount + 1,
     } satisfies ReadPunctuation;
 
     const nextChar = this.source[this.currentPosition + 2];
@@ -639,6 +626,7 @@ export default class Tokenizer {
 
     res.columnEnd += 1;
     res.value = string;
+    res.end = this.currentPosition;
     return res;
   }
 
@@ -750,6 +738,7 @@ export default class Tokenizer {
     while (this.currentChar === "\n" || this.currentChar === "\r") {
       this.nextLine();
       this.updatePosition();
+      this.currentLineColumnCount = 0;
     }
   }
 
@@ -891,9 +880,12 @@ export default class Tokenizer {
     this.currentLineColumnCount = 0;
   }
 
-  private updatePosition(count = 1) {
+  private updatePosition(count = 1, updateColumnCount = true) {
     this.currentPosition += count;
-    this.currentLineColumnCount += count;
+
+    if (updateColumnCount) {
+      this.currentLineColumnCount += count;
+    }
 
     if (this.currentPosition < this.source.length) {
       this.updatePositionState();

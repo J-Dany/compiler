@@ -430,7 +430,6 @@ describe("Tokenizer", () => {
       {
         input: "if (a === 2) { return 1; }",
         expected: [
-          // TokenType, value, start, end, line, columnStart, columnEnd
           new Token(TokenType.If, "if", 0, 2, 1, 0, 2),
           new Token(TokenType.Punctuation, "(", 3, 4, 1, 3, 4),
           new Token(TokenType.Identifier, "a", 4, 5, 1, 4, 5),
@@ -462,10 +461,9 @@ describe("Tokenizer", () => {
           ),
           new Token(TokenType.Punctuation, ";", 23, 24, 1, 23, 24),
           new Token(TokenType.Punctuation, "}", 25, 26, 1, 25, 26),
-          new Token(TokenType.EOF, "")
+          new Token(TokenType.EOF, ""),
         ],
       },
-      // Generate more tests
       {
         input: "if (a === 1) { return 1; } else { return 2; }",
         expected: [
@@ -516,7 +514,7 @@ describe("Tokenizer", () => {
           ),
           new Token(TokenType.Punctuation, ";", 42, 43, 1, 42, 43),
           new Token(TokenType.Punctuation, "}", 44, 45, 1, 44, 45),
-          new Token(TokenType.EOF, "")
+          new Token(TokenType.EOF, ""),
         ],
       },
       {
@@ -543,9 +541,121 @@ describe("Tokenizer", () => {
           new Token(TokenType.Operator, "++", 18, 20, 1, 18, 20),
           new Token(TokenType.Punctuation, ";", 20, 21, 1, 20, 21),
           new Token(TokenType.Punctuation, "}", 22, 23, 1, 22, 23),
-          new Token(TokenType.EOF, "")
+          new Token(TokenType.EOF, ""),
         ],
-      }
+      },
+      {
+        input:
+          "import { useState } from 'react';\nexport default function App() {\n\treturn null;\n}",
+        expected: [
+          new Token(TokenType.Import, "import", 0, 6, 1, 0, 6),
+          new Token(TokenType.Punctuation, "{", 7, 8, 1, 7, 8),
+          new Token(TokenType.Identifier, "useState", 9, 17, 1, 9, 17),
+          new Token(TokenType.Punctuation, "}", 18, 19, 1, 18, 19),
+          new Token(TokenType.From, "from", 20, 24, 1, 20, 24),
+          new Token(TokenType.String, "react", 25, 32, 1, 25, 32),
+          new Token(TokenType.Punctuation, ";", 32, 33, 1, 32, 33),
+          new Token(TokenType.Export, "export", 34, 40, 2, 0, 6),
+          new Token(TokenType.Default, "default", 41, 48, 2, 7, 14),
+          new Token(TokenType.Function, "function", 49, 57, 2, 15, 23),
+          new Token(TokenType.Identifier, "App", 58, 61, 2, 24, 27),
+          new Token(TokenType.Punctuation, "(", 61, 62, 2, 27, 28),
+          new Token(TokenType.Punctuation, ")", 62, 63, 2, 28, 29),
+          new Token(TokenType.Punctuation, "{", 64, 65, 2, 30, 31),
+          new Token(TokenType.Return, "return", 67, 73, 3, 5, 11),
+          new Token(TokenType.Null, null, 74, 78, 3, 12, 16),
+          new Token(TokenType.Punctuation, ";", 78, 79, 3, 16, 17),
+          new Token(TokenType.Punctuation, "}", 80, 81, 4, 0, 1),
+          new Token(TokenType.EOF, ""),
+        ],
+      },
+      {
+        input:
+          "function *genNumbers() {\n\tyield 1;\n\tyield 2;\n\tyield 3;\n}\nconst gen = genNumbers();\nwhile (gen.next().done === false) {\n\tconsole.log(gen.next().value);\n}",
+        expected: [
+          new Token(TokenType.Function, "function", 0, 8, 1, 0, 8),
+          new Token(TokenType.Operator, "*", 9, 10, 1, 9, 10),
+          new Token(TokenType.Identifier, "genNumbers", 10, 20, 1, 10, 20),
+          new Token(TokenType.Punctuation, "(", 20, 21, 1, 20, 21),
+          new Token(TokenType.Punctuation, ")", 21, 22, 1, 21, 22),
+          new Token(TokenType.Punctuation, "{", 23, 24, 1, 23, 24),
+          new Token(TokenType.Yield, "yield", 26, 31, 2, 5, 10),
+          new Token(
+            TokenType.decorateTokenWithInfo(TokenType.Number, {
+              isHexNumber: false,
+            }),
+            1,
+            32,
+            33,
+            2,
+            11,
+            12
+          ),
+          new Token(TokenType.Punctuation, ";", 33, 34, 2, 12, 13),
+          new Token(TokenType.Yield, "yield", 36, 41, 3, 5, 10),
+          new Token(
+            TokenType.decorateTokenWithInfo(TokenType.Number, {
+              isHexNumber: false,
+            }),
+            2,
+            42,
+            43,
+            3,
+            11,
+            12
+          ),
+          new Token(TokenType.Punctuation, ";", 43, 44, 3, 12, 13),
+          new Token(TokenType.Yield, "yield", 46, 51, 4, 5, 10),
+          new Token(
+            TokenType.decorateTokenWithInfo(TokenType.Number, {
+              isHexNumber: false,
+            }),
+            3,
+            52,
+            53,
+            4,
+            11,
+            12
+          ),
+          new Token(TokenType.Punctuation, ";", 53, 54, 4, 12, 13),
+          new Token(TokenType.Punctuation, "}", 55, 56, 5, 0, 1),
+          new Token(TokenType.Const, "const", 57, 62, 6, 0, 5),
+          new Token(TokenType.Identifier, "gen", 63, 66, 6, 6, 9),
+          new Token(TokenType.Operator, "=", 67, 68, 6, 10, 11),
+          new Token(TokenType.Identifier, "genNumbers", 69, 79, 6, 12, 22),
+          new Token(TokenType.Punctuation, "(", 79, 80, 6, 22, 23),
+          new Token(TokenType.Punctuation, ")", 80, 81, 6, 23, 24),
+          new Token(TokenType.Punctuation, ";", 81, 82, 6, 24, 25),
+          new Token(TokenType.While, "while", 83, 88, 7, 0, 5),
+          new Token(TokenType.Punctuation, "(", 89, 90, 7, 6, 7),
+          new Token(TokenType.Identifier, "gen", 90, 93, 7, 7, 10),
+          new Token(TokenType.Punctuation, ".", 93, 94, 7, 10, 11),
+          new Token(TokenType.Identifier, "next", 94, 98, 7, 11, 15),
+          new Token(TokenType.Punctuation, "(", 98, 99, 7, 15, 16),
+          new Token(TokenType.Punctuation, ")", 99, 100, 7, 16, 17),
+          new Token(TokenType.Punctuation, ".", 100, 101, 7, 17, 18),
+          new Token(TokenType.Identifier, "done", 101, 105, 7, 18, 22),
+          new Token(TokenType.Operator, "===", 106, 109, 7, 23, 26),
+          new Token(TokenType.False, false, 110, 115, 7, 27, 32),
+          new Token(TokenType.Punctuation, ")", 115, 116, 7, 32, 33),
+          new Token(TokenType.Punctuation, "{", 117, 118, 7, 34, 35),
+          new Token(TokenType.Identifier, "console", 120, 127, 8, 5, 12),
+          new Token(TokenType.Punctuation, ".", 127, 128, 8, 12, 13),
+          new Token(TokenType.Identifier, "log", 128, 131, 8, 13, 16),
+          new Token(TokenType.Punctuation, "(", 131, 132, 8, 16, 17),
+          new Token(TokenType.Identifier, "gen", 132, 135, 8, 17, 20),
+          new Token(TokenType.Punctuation, ".", 135, 136, 8, 20, 21),
+          new Token(TokenType.Identifier, "next", 136, 140, 8, 21, 25),
+          new Token(TokenType.Punctuation, "(", 140, 141, 8, 25, 26),
+          new Token(TokenType.Punctuation, ")", 141, 142, 8, 26, 27),
+          new Token(TokenType.Punctuation, ".", 142, 143, 8, 27, 28),
+          new Token(TokenType.Identifier, "value", 143, 148, 8, 28, 33),
+          new Token(TokenType.Punctuation, ")", 148, 149, 8, 33, 34),
+          new Token(TokenType.Punctuation, ";", 149, 150, 8, 34, 35),
+          new Token(TokenType.Punctuation, "}", 151, 152, 9, 0, 1),
+          new Token(TokenType.EOF, ""),
+        ],
+      },
     ];
 
     testCases.forEach(({ input, expected }) => {
@@ -558,33 +668,204 @@ describe("Tokenizer", () => {
         }
       });
     });
-  });
 
-  describe("Reading template", () => {
-    const testCases = [
-      {
-        input: "const a = `hello`;",
-        expected: [
-          new Token(TokenType.Const, "const", 0, 5, 1, 0, 5),
-          new Token(TokenType.Identifier, "a", 6, 7, 1, 6, 7),
-          new Token(TokenType.Operator, "=", 8, 9, 1, 8, 9),
-          new Token(TokenType.TemplateStart, "`", 10, 11, 1, 10, 11),
-          new Token(TokenType.TemplateContent, "hello", 11, 16, 1, 11, 16),
-          new Token(TokenType.TemplateEnd, "`", 16, 17, 1, 16, 17),
-          new Token(TokenType.Punctuation, ";", 17, 18, 1, 17, 18),
-          new Token(TokenType.EOF, ""),
-        ],
-      }
-    ];
+    describe("Reading template", () => {
+      const testCases = [
+        {
+          input: "const a = `hello`;",
+          expected: [
+            new Token(TokenType.Const, "const", 0, 5, 1, 0, 5),
+            new Token(TokenType.Identifier, "a", 6, 7, 1, 6, 7),
+            new Token(TokenType.Operator, "=", 8, 9, 1, 8, 9),
+            new Token(TokenType.TemplateStart, "`", 10, 11, 1, 10, 11),
+            new Token(TokenType.TemplateContent, "hello", 11, 16, 1, 11, 16),
+            new Token(TokenType.TemplateEnd, "`", 16, 17, 1, 16, 17),
+            new Token(TokenType.Punctuation, ";", 17, 18, 1, 17, 18),
+            new Token(TokenType.EOF, ""),
+          ],
+        },
+        {
+          input: "const a = 10;\nconsole.log(`Count: ${a}`);",
+          expected: [
+            new Token(TokenType.Const, "const", 0, 5, 1, 0, 5),
+            new Token(TokenType.Identifier, "a", 6, 7, 1, 6, 7),
+            new Token(TokenType.Operator, "=", 8, 9, 1, 8, 9),
+            new Token(
+              TokenType.decorateTokenWithInfo(TokenType.Number, {
+                isHexNumber: false,
+              }),
+              10,
+              10,
+              12,
+              1,
+              10,
+              12
+            ),
+            new Token(TokenType.Punctuation, ";", 12, 13, 1, 12, 13),
+            new Token(TokenType.Identifier, "console", 14, 21, 2, 0, 7),
+            new Token(TokenType.Punctuation, ".", 21, 22, 2, 7, 8),
+            new Token(TokenType.Identifier, "log", 22, 25, 2, 8, 11),
+            new Token(TokenType.Punctuation, "(", 25, 26, 2, 11, 12),
+            new Token(TokenType.TemplateStart, "`", 26, 27, 2, 12, 13),
+            new Token(TokenType.TemplateContent, "Count: ", 27, 34, 2, 13, 20),
+            new Token(
+              TokenType.TemplateExpressionStart,
+              "${",
+              34,
+              36,
+              2,
+              20,
+              22
+            ),
+            new Token(TokenType.Identifier, "a", 36, 37, 2, 22, 23),
+            new Token(TokenType.TemplateExpressionEnd, "}", 37, 38, 2, 23, 24),
+            new Token(TokenType.TemplateEnd, "`", 38, 39, 2, 24, 25),
+            new Token(TokenType.Punctuation, ")", 39, 40, 2, 25, 26),
+            new Token(TokenType.Punctuation, ";", 40, 41, 2, 26, 27),
+            new Token(TokenType.EOF, ""),
+          ],
+        },
+        {
+          input: "const a = 10;\nconsole.log(`Count: ${a} - ${a + 1}`);",
+          expected: [
+            new Token(TokenType.Const, "const", 0, 5, 1, 0, 5),
+            new Token(TokenType.Identifier, "a", 6, 7, 1, 6, 7),
+            new Token(TokenType.Operator, "=", 8, 9, 1, 8, 9),
+            new Token(
+              TokenType.decorateTokenWithInfo(TokenType.Number, {
+                isHexNumber: false,
+              }),
+              10,
+              10,
+              12,
+              1,
+              10,
+              12
+            ),
+            new Token(TokenType.Punctuation, ";", 12, 13, 1, 12, 13),
+            new Token(TokenType.Identifier, "console", 14, 21, 2, 0, 7),
+            new Token(TokenType.Punctuation, ".", 21, 22, 2, 7, 8),
+            new Token(TokenType.Identifier, "log", 22, 25, 2, 8, 11),
+            new Token(TokenType.Punctuation, "(", 25, 26, 2, 11, 12),
+            new Token(TokenType.TemplateStart, "`", 26, 27, 2, 12, 13),
+            new Token(TokenType.TemplateContent, "Count: ", 27, 34, 2, 13, 20),
+            new Token(
+              TokenType.TemplateExpressionStart,
+              "${",
+              34,
+              36,
+              2,
+              20,
+              22
+            ),
+            new Token(TokenType.Identifier, "a", 36, 37, 2, 22, 23),
+            new Token(TokenType.TemplateExpressionEnd, "}", 37, 38, 2, 23, 24),
+            new Token(TokenType.TemplateContent, " - ", 38, 41, 2, 24, 27),
+            new Token(
+              TokenType.TemplateExpressionStart,
+              "${",
+              41,
+              43,
+              2,
+              27,
+              29
+            ),
+            new Token(TokenType.Identifier, "a", 43, 44, 2, 29, 30),
+            new Token(TokenType.Operator, "+", 45, 46, 2, 31, 32),
+            new Token(
+              TokenType.decorateTokenWithInfo(TokenType.Number, {
+                isHexNumber: false,
+              }),
+              1,
+              47,
+              48,
+              2,
+              33,
+              34
+            ),
+            new Token(TokenType.TemplateExpressionEnd, "}", 48, 49, 2, 34, 35),
+            new Token(TokenType.TemplateEnd, "`", 49, 50, 2, 35, 36),
+            new Token(TokenType.Punctuation, ")", 50, 51, 2, 36, 37),
+            new Token(TokenType.Punctuation, ";", 51, 52, 2, 37, 38),
+            new Token(TokenType.EOF, ""),
+          ],
+        },
+        {
+          input: "const a=10;\nconsole.log(`Count: ${a}-${a+1}`);",
+          expected: [
+            new Token(TokenType.Const, "const", 0, 5, 1, 0, 5),
+            new Token(TokenType.Identifier, "a", 6, 7, 1, 6, 7),
+            new Token(TokenType.Operator, "=", 7, 8, 1, 7, 8),
+            new Token(
+              TokenType.decorateTokenWithInfo(TokenType.Number, {
+                isHexNumber: false,
+              }),
+              10,
+              8,
+              10,
+              1,
+              8,
+              10
+            ),
+            new Token(TokenType.Punctuation, ";", 10, 11, 1, 10, 11),
+            new Token(TokenType.Identifier, "console", 12, 19, 2, 0, 7),
+            new Token(TokenType.Punctuation, ".", 19, 20, 2, 7, 8),
+            new Token(TokenType.Identifier, "log", 20, 23, 2, 8, 11),
+            new Token(TokenType.Punctuation, "(", 23, 24, 2, 11, 12),
+            new Token(TokenType.TemplateStart, "`", 24, 25, 2, 12, 13),
+            new Token(TokenType.TemplateContent, "Count: ", 25, 32, 2, 13, 20),
+            new Token(
+              TokenType.TemplateExpressionStart,
+              "${",
+              32,
+              34,
+              2,
+              20,
+              22
+            ),
+            new Token(TokenType.Identifier, "a", 34, 35, 2, 22, 23),
+            new Token(TokenType.TemplateExpressionEnd, "}", 35, 36, 2, 23, 24),
+            new Token(TokenType.TemplateContent, "-", 36, 37, 2, 24, 25),
+            new Token(
+              TokenType.TemplateExpressionStart,
+              "${",
+              37,
+              39,
+              2,
+              25,
+              27
+            ),
+            new Token(TokenType.Identifier, "a", 39, 40, 2, 27, 28),
+            new Token(TokenType.Operator, "+", 40, 41, 2, 28, 29),
+            new Token(
+              TokenType.decorateTokenWithInfo(TokenType.Number, {
+                isHexNumber: false,
+              }),
+              1,
+              41,
+              42,
+              2,
+              29,
+              30
+            ),
+            new Token(TokenType.TemplateExpressionEnd, "}", 42, 43, 2, 30, 31),
+            new Token(TokenType.TemplateEnd, "`", 43, 44, 2, 31, 32),
+            new Token(TokenType.Punctuation, ")", 44, 45, 2, 32, 33),
+            new Token(TokenType.Punctuation, ";", 45, 46, 2, 33, 34),
+            new Token(TokenType.EOF, ""),
+          ],
+        },
+      ];
 
-    testCases.forEach(({ input, expected }) => {
-      test(`Read '${input}'`, () => {
-        const tokenizer = new Tokenizer(input);
-        let count = 0;
-        for (const token of tokenizer.tokenize()) {
-          expect(token).toEqual(expected[count]);
-          count++;
-        }
+      testCases.forEach(({ input, expected }) => {
+        test(`Read '${input}'`, () => {
+          const tokenizer = new Tokenizer(input);
+          let count = 0;
+          for (const token of tokenizer.tokenize()) {
+            expect(token).toEqual(expected[count]);
+            count++;
+          }
+        });
       });
     });
   });

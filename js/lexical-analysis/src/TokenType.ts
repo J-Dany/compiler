@@ -131,6 +131,9 @@ export default class TokenType {
   public static readonly Null = new TokenType("null", {
     isKeyword: true,
   });
+  public static readonly Undefined = new TokenType("undefined", {
+    isKeyword: true,
+  });
   public static readonly Async = new TokenType("async", {
     isKeyword: true,
   });
